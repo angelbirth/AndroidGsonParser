@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonStreamParser;
 import com.google.gson.reflect.TypeToken;
+import com.shifair.androidgsonparser.model.SOResponse;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -98,8 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         ResponseBody body = response.body();
                         Reader reader = body.charStream();
                         Gson gson = new Gson();
-                        Map<String,?> o = gson.fromJson(reader, new TypeToken<Map<String, ?>>() {
-                        }.getType());
+                        SOResponse resp = gson.fromJson(reader, SOResponse.class);
 
                         Log.i(TAG, "onResponse: ");
                     }
