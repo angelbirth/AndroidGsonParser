@@ -14,7 +14,7 @@ public class Items {
 
     private String answer_count;
 
-    private Owner owner;
+    private com.shifair.androidgsonparser.model.Owner owner;
 
     private String last_activity_date;
 
@@ -84,12 +84,12 @@ public class Items {
         this.answer_count = answer_count;
     }
 
-    public Owner getOwner ()
+    public com.shifair.androidgsonparser.model.Owner getOwner ()
     {
         return owner;
     }
 
-    public void setOwner (Owner owner)
+    public void setOwner (com.shifair.androidgsonparser.model.Owner owner)
     {
         this.owner = owner;
     }
