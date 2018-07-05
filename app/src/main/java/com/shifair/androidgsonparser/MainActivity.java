@@ -1,10 +1,11 @@
 package com.shifair.androidgsonparser;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -12,29 +13,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonStreamParser;
-import com.google.gson.reflect.TypeToken;
 import com.shifair.androidgsonparser.model.SOResponse;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -74,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String search = et_search.getText().toString();
 //                noWhiteSpace = doneSearch.replaceAll(" ", "%20");
-                 urlString = BASE_URL + "?order=desc&sort=activity&filter=default&site=stackoverflow&run=true";
+                urlString = BASE_URL + "?order=desc&sort=activity&filter=default&site=stackoverflow&run=true";
                 OkHttpClient client = new OkHttpClient();
                 HttpUrl temp = HttpUrl.parse(urlString);
                 okhttp3.HttpUrl url = temp.newBuilder()
@@ -84,7 +67,19 @@ public class MainActivity extends AppCompatActivity {
                         .get()
                         .url(url)
                         .build();
-                client.newCall(req).enqueue(new Callback() {
+                final Call call = client.newCall(req);
+
+                final ProgressDialog pd = new ProgressDialog(MainActivity.this);
+                pd.setCancelable(true);
+                pd.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        call.cancel();
+                    }
+                });
+                pd.setIndeterminate(true);
+                pd.show();
+                call.enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
@@ -93,14 +88,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call call, okhttp3.Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, ""+response.code(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "" + response.code(), Toast.LENGTH_SHORT).show();
                             return;
                         }
                         ResponseBody body = response.body();
                         Reader reader = body.charStream();
                         Gson gson = new Gson();
-                        SOResponse resp = gson.fromJson(reader, SOResponse.class);
-
+                        final SOResponse resp = gson.fromJson(reader, SOResponse.class);
+                        pd.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                parseData(resp);
+                            }
+                        });
                         Log.i(TAG, "onResponse: ");
                     }
                 });
@@ -109,35 +110,9 @@ public class MainActivity extends AppCompatActivity {
 //        requestJsonObject();
     }
 
-    private void requestJsonObject() {
-
-//        bro = (TextView) findViewById(R.id.bro);
-
-
-        final RequestQueue queue = Volley.newRequestQueue(this);
-//        String url ="http://toscanyacademy.com/blog/mp.php";
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, urlString, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Log.d(TAG, "Response " + response);
-                GsonBuilder builder = new GsonBuilder();
-                Gson mGson = builder.create();
-
-                List<ItemObject> posts = new ArrayList<ItemObject>();
-                posts = Arrays.asList(mGson.fromJson(response, ItemObject[].class));
-
-                adapter = new RecyclerViewAdapter(MainActivity.this, posts);
-                recyclerView.setAdapter(adapter);
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "Error " + error.getMessage());
-            }
-        });
-        queue.add(stringRequest);
-
+    private void parseData(SOResponse response) {
+        adapter = new RecyclerViewAdapter(this, response.getItems());
+        recyclerView.setAdapter(adapter);
     }
+
 }

@@ -228,7 +228,19 @@ public class Item {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("tags", tags).append("owner", owner).append("isAnswered", isAnswered).append("viewCount", viewCount).append("answerCount", answerCount).append("score", score).append("lastActivityDate", lastActivityDate).append("creationDate", creationDate).append("questionId", questionId).append("link", link).append("title", title).toString();
+        return new ToStringBuilder(this)
+                .append("tags", tags)
+                .append("owner", owner)
+                .append("isAnswered", isAnswered)
+                .append("viewCount", viewCount)
+                .append("answerCount", answerCount)
+                .append("score", score)
+                .append("lastActivityDate", lastActivityDate)
+                .append("creationDate", creationDate)
+                .append("questionId", questionId)
+                .append("link", link)
+                .append("title", title)
+                .toString();
     }
 
     @Override
@@ -238,10 +250,11 @@ public class Item {
 
     @Override
     public boolean equals(Object other) {
+        if (other == null) return false;
         if (other == this) {
             return true;
         }
-        if ((other instanceof Item) == false) {
+        if (!(other instanceof Item)) {
             return false;
         }
         Item rhs = ((Item) other);
