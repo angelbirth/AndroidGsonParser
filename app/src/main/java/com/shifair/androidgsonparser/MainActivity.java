@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,14 +17,16 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.shifair.androidgsonparser.model.SOResponse;
 
+
 import java.io.IOException;
 import java.io.Reader;
 
-import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bt_search = findViewById(R.id.bt_search);
-        et_search = findViewById(R.id.et_search);
+        bt_search = (Button) findViewById(R.id.bt_search);
+        et_search = (EditText) findViewById(R.id.et_search);
 
-        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
         layoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(layoutManager);
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                         .get()
                         .url(url)
                         .build();
-                final Call call = client.newCall(req);
+                final okhttp3.Call call = client.newCall(req);
 
                 final ProgressDialog pd = new ProgressDialog(MainActivity.this);
                 pd.setCancelable(true);
@@ -81,12 +84,12 @@ public class MainActivity extends AppCompatActivity {
                 pd.show();
                 call.enqueue(new Callback() {
                     @Override
-                    public void onFailure(Call call, IOException e) {
+                    public void onFailure(okhttp3.Call call, IOException e) {
                         e.printStackTrace();
                     }
 
                     @Override
-                    public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                    public void onResponse(okhttp3.Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Toast.makeText(MainActivity.this, "" + response.code(), Toast.LENGTH_SHORT).show();
                             return;
@@ -104,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                         Log.i(TAG, "onResponse: ");
                     }
+
                 });
             }
         });
